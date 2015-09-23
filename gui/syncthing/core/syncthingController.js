@@ -114,6 +114,22 @@ angular.module('syncthing.core')
             $('#networkError').modal('hide');
             $('#restarting').modal('hide');
             $('#shutdown').modal('hide');
+            if ($location.$$hash.indexOf("uri=web+syncthing:") == 0) {
+                var index = $location.$$hash.indexOf("://") + 3;
+                var id = $location.$$hash.substring(index);
+                
+                $scope.currentDevice = {
+                    deviceID: id,
+                    _addressesStr: 'dynamic',
+                    compression: 'metadata',
+                    introducer: false,
+                    selectedFolders: {}
+                };
+                $scope.editingExisting = false;
+                $scope.deviceEditor.$setPristine();
+                $('#editDevice').modal();
+                $location.hash("");
+            }
         });
 
         $scope.$on(Events.OFFLINE, function () {
@@ -1403,6 +1419,12 @@ angular.module('syncthing.core')
             $http.post(urlbase + "/db/scan");
         };
 
+        $scope.installHandler = function () {
+            navigator.registerProtocolHandler("web+syncthing",
+                                  "/#uri=%s",
+                                  "Syncthing Handler");
+        };
+        
         $scope.rescanFolder = function (folder) {
             $http.post(urlbase + "/db/scan?folder=" + encodeURIComponent(folder));
         };
